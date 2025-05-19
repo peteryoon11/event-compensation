@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 1q2w3e4r
+      MONGO_INITDB_DATABASE: myapp  # ✅ 초기 생성 DB 이름
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro # ✅ 초기화 스크립트
+
+volumes:
+  mongodb_data:
