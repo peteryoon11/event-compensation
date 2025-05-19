@@ -114,7 +114,8 @@ export class GatewayManagerController {
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   // @Roles(MemberRole.ADMIN)
-  @Roles('admin')
+  @Roles(MemberRole.USER)
+  // @Roles('admin')
   @Get('/profile')
   async getProfile(@Req() req) {
     const URL = `${this.AUTH_SERVER}/auth/profile`;

@@ -25,9 +25,8 @@ export class Member {
   password?: string;
 
   @Prop({
-    type: [SchemaTypes.String],
+    type: SchemaTypes.String,
     enum: MemberRole,
-    // default: [MemberRole.USER],
     default: MemberRole.USER,
     required: true,
   })

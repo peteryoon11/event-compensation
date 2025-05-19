@@ -57,6 +57,7 @@ export class RoleManagerController {
       throw new UnauthorizedException('Invalid email or password');
     }
 
+    console.log(`user ${JSON.stringify(user, null, 2)}`);
     const isMatch: boolean = await bcrypt.compare(
       body.password,
       user.password || '',
