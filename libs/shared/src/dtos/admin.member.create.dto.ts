@@ -1,13 +1,16 @@
 import { MemberRole } from '@libs/shared/constants/member/member-enum';
 import { IsEnum, IsString } from 'class-validator';
 
-export class MemberCreateDto {
+export class AdminMemberCreateDto {
   @IsString()
   email: string;
   @IsString()
   password: string;
 
-  constructor(params?: Partial<MemberCreateDto>) {
+  @IsEnum(MemberRole)
+  role: MemberRole;
+
+  constructor(params?: Partial<AdminMemberCreateDto>) {
     Object.assign(this, params);
   }
 }

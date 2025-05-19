@@ -24,20 +24,28 @@ export class RoleManagerService {
     return this.memberModel.findOne({ email });
   }
 
-  async createMember(user: MemberCreateDto) {
+  async createMember({
+    email,
+    password,
+    role,
+  }: {
+    email: string;
+    password: string;
+    role: MemberRole;
+  }) {
     const memberModel = new this.memberModel({
-      email: user.email,
-      password: user.password,
-      role: user.role,
+      email,
+      password,
+      role,
     });
 
     return memberModel.save();
   }
 
-  async login(user: MemberCreateDto) {
+  async login({ email, role }: { email: string; role: MemberRole }) {
     const payload = {
-      email: user.email,
-      role: user.role,
+      email,
+      role,
     };
     console.log(`paylodad ${JSON.stringify(payload, null, 2)}`);
     return {

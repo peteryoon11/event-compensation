@@ -6,12 +6,13 @@ import {
   Post,
   Req,
   UnauthorizedException,
-  UseGuards,
 } from '@nestjs/common';
 import { RoleManagerService } from './role-manager.service';
 
 import { MemberCreateDto } from '@libs/shared/dtos/member.create.dto';
 import * as bcrypt from 'bcrypt';
+import { MemberRole } from '@libs/shared/constants/member/member-enum';
+import { AdminMemberCreateDto } from '@libs/shared/dtos/admin.member.create.dto';
 
 @Controller('auth')
 export class RoleManagerController {
@@ -30,21 +31,35 @@ export class RoleManagerController {
     };
   }
 
+  // 일반 유저 생성
   @Post('/create/user')
-  async createMember(@Body() body: MemberCreateDto): Promise<any> {
+  async createMember(@Body() body: AdminMemberCreateDto): Promise<any> {
     console.log(`@@@@ auth body ${JSON.stringify(body, null, 2)}`);
     const exists = await this.roleManagerService.memberFindOne(body.email);
     if (exists) throw new ConflictException('User already exists');
 
     const hashedPassword = await bcrypt.hash(body.password, 10);
 
-    return await this.roleManagerService.createMember(
-      new MemberCreateDto({
-        email: body.email,
-        password: hashedPassword,
-        role: body.role,
-      }),
-    );
+    return await this.roleManagerService.createMember({
+      email: body.email,
+      password: hashedPassword,
+      role: MemberRole.USER,
+    });
+  }
+  // 특수 유저 생성
+  @Post('/create/admin/user')
+  async createAdminMember(@Body() body: AdminMemberCreateDto): Promise<any> {
+    console.log(`@@@@ auth body ${JSON.stringify(body, null, 2)}`);
+    const exists = await this.roleManagerService.memberFindOne(body.email);
+    if (exists) throw new ConflictException('User already exists');
+
+    const hashedPassword = await bcrypt.hash(body.password, 10);
+
+    return await this.roleManagerService.createMember({
+      email: body.email,
+      password: hashedPassword,
+      role: MemberRole.USER,
+    });
   }
 
   @Post('login')
@@ -66,11 +81,9 @@ export class RoleManagerController {
       throw new UnauthorizedException('Invalid email or password ..');
     }
 
-    return this.roleManagerService.login(
-      new MemberCreateDto({
-        email: user.email,
-        role: user.role,
-      }),
-    );
+    return this.roleManagerService.login({
+      email: user.email,
+      role: user.role,
+    });
   }
 }

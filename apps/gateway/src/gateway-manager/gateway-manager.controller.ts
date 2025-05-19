@@ -11,14 +11,12 @@ import {
 import { HttpService } from '@nestjs/axios';
 import { GatewayManagerService } from './gateway-manager.service';
 import { AuthGuard } from '@nestjs/passport';
-// import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '@libs/shared/auth/roles.decorator';
 import { RolesGuard } from '@libs/shared/auth/roles.guard';
 import { catchError, lastValueFrom, throwError } from 'rxjs';
 import { MemberRole } from '@libs/shared/constants/member/member-enum';
 import { MemberCreateDto } from '@libs/shared/dtos/member.create.dto';
-// import { Roles } from '../auth/roles.decorator';
-// import { Roles } from '../auth/roles.decorator';
+import { AdminMemberCreateDto } from '@libs/shared/dtos/admin.member.create.dto';
 
 @Controller()
 export class GatewayManagerController {
@@ -35,37 +33,22 @@ export class GatewayManagerController {
   private readonly AUTH_SERVER;
   private readonly EVENT_SERVER;
 
-  @Post('create/user')
-  async createMember(
-    // @Body() body: { email: string; password: string; role: MemberRole },
-    @Body() body: MemberCreateDto,
-  ) {
-    const URL = `${this.AUTH_SERVER}/auth/create/user`;
-    console.log(`@@@@ gw url ${URL}`);
-
+  async postTryCatch({ receiveData, URL }: { receiveData: any; URL: string }) {
     try {
-      const res$ = this.httpService
-        .post(URL, {
-          email: body.email,
-          password: body.password,
-          role: body.role,
-        })
-        .pipe(
-          catchError((error) => {
-            const msg =
-              error?.response?.data?.message ||
-              error.message ||
-              'Unknown error';
-            const status = error?.response?.status || 500;
+      const res$ = this.httpService.post(URL, receiveData).pipe(
+        catchError((error) => {
+          const msg =
+            error?.response?.data?.message || error.message || 'Unknown error';
+          const status = error?.response?.status || 500;
 
-            this.logger.error(
-              `❌ External API Error: ${msg}`,
-              JSON.stringify(error?.response?.data),
-            );
+          this.logger.error(
+            `❌ External API Error: ${msg}`,
+            JSON.stringify(error?.response?.data),
+          );
 
-            return throwError(() => new HttpException(msg, status));
-          }),
-        );
+          return throwError(() => new HttpException(msg, status));
+        }),
+      );
       const { data } = await lastValueFrom(res$);
       console.log(`data  ${JSON.stringify(data, null, 2)}`);
       return data;
@@ -74,6 +57,40 @@ export class GatewayManagerController {
       this.logger.error(`❗ Failed to call external API: ${err.message}`);
       throw err;
     }
+  }
+
+  @Post('create/user')
+  async createMember(
+    // @Body() body: { email: string; password: string; role: MemberRole },
+    @Body() body: MemberCreateDto,
+  ) {
+    const URL = `${this.AUTH_SERVER}/auth/create/user`;
+    console.log(`@@@@ gw create/user url ${URL}`);
+    console.log(`@@@@ gw create/user body ${JSON.stringify(body)}`);
+    return await this.postTryCatch({
+      receiveData: {
+        email: body.email,
+        password: body.password,
+        role: MemberRole.USER,
+      },
+      URL,
+    });
+  }
+  @Post('create/admin/user')
+  async createAdminMember(
+    // @Body() body: { email: string; password: string; role: MemberRole },
+    @Body() body: AdminMemberCreateDto,
+  ) {
+    const URL = `${this.AUTH_SERVER}/auth/create/admin/user`;
+    console.log(`@@@@ gw url ${URL}`);
+    return await this.postTryCatch({
+      receiveData: {
+        email: body.email,
+        password: body.password,
+        role: body.role,
+      },
+      URL,
+    });
   }
 
   @Post('user/login')
@@ -113,9 +130,7 @@ export class GatewayManagerController {
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
-  // @Roles(MemberRole.ADMIN)
-  @Roles(MemberRole.USER)
-  // @Roles('admin')
+  @Roles(MemberRole.USER, MemberRole.ADMIN)
   @Get('/profile')
   async getProfile(@Req() req) {
     const URL = `${this.AUTH_SERVER}/auth/profile`;
