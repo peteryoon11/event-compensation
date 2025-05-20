@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  auth:
+    build:
+      context: .
+      dockerfile: apps/auth/Dockerfile
+    ports:
+      - "3010:3010"
+    volumes:
+      - .:/app
+    command: ["node", "dist/apps/auth/main"]
+
+
+  event:
+    build:
+      context: .
+      dockerfile: apps/event/Dockerfile
+    ports:
+      - "3020:3020"
+    volumes:
+      - .:/app
+    command: ["node", "dist/apps/event/main"]
+  gateway:
+    build:
+      context: .
+      dockerfile: apps/gateway/Dockerfile
+    ports:
+      - "3030:3030"
+    volumes:
+      - .:/app
+    command: ["node", "dist/apps/gateway/main"]
