@@ -2,35 +2,19 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { SchemaTypes, Types } from 'mongoose';
 import {
-  EventConditionType,
+  CompensationType,
   Status,
 } from '@libs/shared/constants/events/events-enum';
 
-export type EventDocument = HydratedDocument<Event>;
-
-// 조건 타입 정의
-export class EventCondition {
-  @Prop({
-    required: true,
-    type: SchemaTypes.String,
-    enum: EventConditionType,
-  })
-  type: EventConditionType;
-
-  @Prop({
-    required: true,
-    type: SchemaTypes.Number,
-  })
-  value: number;
-}
+export type CompensationDocument = HydratedDocument<Compensation>;
 
 @Schema({
   _id: true,
-  collection: 'events',
+  collection: 'compensation',
   minimize: false,
   timestamps: true,
 })
-export class Events {
+export class Compensation {
   @Prop({
     required: true,
     type: SchemaTypes.String,
@@ -44,13 +28,6 @@ export class Events {
   title: string;
 
   @Prop({
-    type: [EventCondition],
-    default: [],
-    _id: false,
-  })
-  conditions: EventCondition[];
-
-  @Prop({
     required: true,
     type: SchemaTypes.String,
     enum: Status,
@@ -59,16 +36,19 @@ export class Events {
   status: Status;
 
   @Prop({
-    type: SchemaTypes.Date,
     required: true,
+    type: SchemaTypes.String,
+    enum: CompensationType,
+    default: CompensationType.ITEM,
   })
-  startDate: Date;
+  type: CompensationType;
 
   @Prop({
-    type: SchemaTypes.Date,
     required: true,
+    type: SchemaTypes.Number,
+    default: 1,
   })
-  endDate: Date;
+  value: number;
 
   @Prop({
     type: SchemaTypes.Mixed,
@@ -78,11 +58,4 @@ export class Events {
   meta?: Record<string, any>;
 }
 
-export const EventSchema = SchemaFactory.createForClass(Events);
-
-EventSchema.index({
-  creatorEmail: 1,
-});
-EventSchema.index({
-  status: 1,
-});
+export const CompensationSchema = SchemaFactory.createForClass(Compensation);

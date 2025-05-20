@@ -4,8 +4,6 @@ import { Model } from 'mongoose';
 import { Member } from '@libs/shared/schemas/member/member.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { MemberRole } from '@libs/shared/constants/member/member-enum';
-import { MemberCreateDto } from '@libs/shared/dtos/member.create.dto';
-// import { MemberCreateDto } from './dtos/member.create.dto';
 
 @Injectable()
 export class RoleManagerService {
